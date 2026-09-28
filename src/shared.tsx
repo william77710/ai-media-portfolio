@@ -99,12 +99,12 @@ export async function proxyOrDemo(
   }
 
   const cleanBase = settings.baseUrl.trim().replace(//+$/, '');
-  const endpoint = `${cleanBase}/chat/completions`;
-  const defaultSys = `你是一位资深融媒体采编主任、影视编导与纪录片剪辑专家。请严格按照任务要求的结构化 JSON 格式返回，不输出任何与 JSON 无关的客套话。`;
+  const endpoint = cleanBase + '/chat/completions';
+  const defaultSys = '你是一位资深融媒体采编主任、影视编导与纪录片剪辑专家。请严格按照任务要求的结构化 JSON 格式返回，不输出任何与 JSON 无关的客套话。';
 
   try {
-    const userContent = `任务名称: ${task}
-输入参数: ${JSON.stringify(payload, null, 2)}`;
+    const userContent = '任务名称: ' + task + '
+输入参数: ' + JSON.stringify(payload, null, 2);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 25000);
 
@@ -112,7 +112,7 @@ export async function proxyOrDemo(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${settings.apiKey.trim()}`,
+        'Authorization': 'Bearer ' + settings.apiKey.trim(),
       },
       body: JSON.stringify({
         model: settings.model || 'deepseek-chat',
@@ -128,7 +128,7 @@ export async function proxyOrDemo(
 
     if (!res.ok) {
       const errText = await res.text();
-      throw new Error(`API 响应错误 HTTP ${res.status}: ${errText.slice(0, 150)}`);
+      throw new Error('API 响应错误 HTTP ' + res.status + ': ' + errText.slice(0, 150));
     }
 
     const json = await res.json();
@@ -162,7 +162,7 @@ export function AISettingsModal({ open, onClose }: { open: boolean; onClose: () 
 
   const handleSave = () => {
     setAISettings(settings);
-    toast(settings.provider === 'demo' || !settings.apiKey.trim() ? '已切换为 Demo 案例模式' : `已配置并启用 ${settings.provider} 真实模型`);
+    toast(settings.provider === 'demo' || !settings.apiKey.trim() ? '已切换为 Demo 案例模式' : '已配置并启用 ' + settings.provider + ' 真实模型');
     onClose();
   };
 
@@ -175,20 +175,20 @@ export function AISettingsModal({ open, onClose }: { open: boolean; onClose: () 
     setTestRes(null);
     try {
       const cleanBase = settings.baseUrl.trim().replace(//+$/, '');
-      const endpoint = `${cleanBase}/chat/completions`;
+      const endpoint = cleanBase + '/chat/completions';
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${settings.apiKey.trim()}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.apiKey.trim() },
         body: JSON.stringify({ model: settings.model, messages: [{ role: 'user', content: 'hi' }], max_tokens: 5 }),
       });
       if (res.ok) {
         setTestRes({ ok: true, msg: '连通性测试成功！可正常使用真实 AI。' });
       } else {
         const text = await res.text();
-        setTestRes({ ok: false, msg: `连接失败 (HTTP ${res.status}): ${text.slice(0, 80)}` });
+        setTestRes({ ok: false, msg: '连接失败 (HTTP ' + res.status + '): ' + text.slice(0, 80) });
       }
     } catch (e: any) {
-      setTestRes({ ok: false, msg: `CORS 或网络阻断: ${e.message || '请检查 Base URL 是否支持跨域'}` });
+      setTestRes({ ok: false, msg: 'CORS 或网络阻断: ' + (e.message || '请检查 Base URL 是否支持跨域') });
     } finally {
       setTesting(false);
     }
@@ -221,7 +221,7 @@ export function AISettingsModal({ open, onClose }: { open: boolean; onClose: () 
         </div>
 
         {settings.provider !== 'demo' && (
-          <>
+          <div>
             <div>
               <label className="font-semibold block mb-1">API Key</label>
               <Input
@@ -231,7 +231,7 @@ export function AISettingsModal({ open, onClose }: { open: boolean; onClose: () 
                 placeholder="sk-..."
               />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mt-2">
               <div>
                 <label className="font-semibold block mb-1">Base URL</label>
                 <Input
@@ -250,7 +250,7 @@ export function AISettingsModal({ open, onClose }: { open: boolean; onClose: () 
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2 pt-2">
               <B variant="outline" onClick={handleTest} disabled={testing}>
                 <RefreshCw className={cn('size-3.5', testing && 'animate-spin')} />
                 {testing ? '测试中...' : '测试连通性'}
@@ -262,7 +262,7 @@ export function AISettingsModal({ open, onClose }: { open: boolean; onClose: () 
                 </div>
               )}
             </div>
-          </>
+          </div>
         )}
 
         <div className="flex items-center justify-between pt-3 border-t border-border/40">
@@ -299,7 +299,7 @@ export function ScenarioPickerModal({
 
   if (!open) return null;
   return (
-    <Modal t={`📚 ${title}（20组场景）`} onClose={onClose} w="max-w-2xl">
+    <Modal t={'📚 ' + title + '（20组场景）'} onClose={onClose} w="max-w-2xl">
       <div className="space-y-3">
         <div className="flex items-center gap-1.5 flex-wrap border-b border-border/40 pb-2">
           {categories.map(c => (
@@ -318,7 +318,7 @@ export function ScenarioPickerModal({
           {filtered.map(s => (
             <div
               key={s.id}
-              onClick={() => { onSelect(s); onClose(); toast(`已载入场景：${s.title}`); }}
+              onClick={() => { onSelect(s); onClose(); toast('已载入场景：' + s.title); }}
               className="p-2.5 rounded-lg border border-border/50 bg-card hover:border-primary/40 hover:shadow-sm cursor-pointer transition-all flex flex-col justify-between group"
             >
               <div>
