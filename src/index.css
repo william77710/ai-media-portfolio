@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+@import "./theme.css";
+
+@theme inline {
+  --font-sans: 'Noto Sans SC', system-ui, sans-serif;
+  --font-serif: 'Noto Serif SC', serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --color-background: hsl(40 20% 97%);
+  --color-foreground: hsl(222 20% 16%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222 20% 16%);
+  --color-muted: hsl(220 15% 94%);
+  --color-muted-foreground: hsl(220 10% 45%);
+  --color-primary: hsl(218 65% 28%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(220 15% 94%);
+  --color-secondary-foreground: hsl(218 65% 28%);
+  --color-accent: hsl(220 15% 94%);
+  --color-accent-foreground: hsl(218 65% 28%);
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-border: hsl(220 10% 88%);
+  --color-input: hsl(220 10% 88%);
+  --color-ring: hsl(218 65% 28%);
+
+  --color-amber-50: hsl(38 90% 96%);
+  --color-amber-200: hsl(38 85% 70%);
+  --color-amber-700: hsl(28 80% 35%);
+  --color-green-50: hsl(142 50% 95%);
+  --color-green-200: hsl(142 45% 65%);
+  --color-green-700: hsl(142 55% 25%);
+  --color-red-50: hsl(0 60% 96%);
+  --color-red-200: hsl(0 65% 75%);
+  --color-red-700: hsl(0 70% 35%);
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
+
+@layer base {
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body { min-height: 100vh; }
+  * { border-color: var(--color-border); }
+}
