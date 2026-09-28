@@ -1,9 +1,8 @@
 import { StrictMode, useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter, Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { AlertTriangle, BookOpen, ChevronRight, Download, Film, Home, Layers, Mic, Plus, Search, Sparkles, XCircle, Settings, BookMarked } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Download, Film, Home, Layers, Plus, Search, Sparkles, XCircle, Settings, BookMarked, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import ShotFlowPage from './ShotFlowPage';
-import QuoteCutPage from './QuoteCutPage';
 import { B, Badge, Card, Input, ProjModal, TA, cn, dlFile, proxyOrDemo, toast, uid, usePM, AISettingsModal, ScenarioPickerModal, getAISettings, robustJSONParse } from './shared';
 import { MEDIALENS_SCENARIOS } from './corpus';
 import './index.css';
@@ -12,23 +11,23 @@ type Block = { id: string; title: string; items: string[]; verify?: boolean };
 type MLProj = { id: string; title: string; topic: string; bg: string; blocks: Block[] };
 
 const defs: [string, string, boolean][] = [
-  ['value', '选题价值', false], ['audience', '目标受众', false], ['angles', '报道角度', false],
-  ['sources', '采访对象', false], ['questions', '采访问题', false], ['facts', '已知事实', true],
-  ['opinions', '各方观点', true], ['verify', '待核实信息', true], ['checklist', '事实核查清单', true],
-  ['titles', '平台标题方向', false],
+  ['value', '选题价值与社会共鸣', false], ['audience', '目标受众与圈层画像', false], ['angles', '多维报道与切入角度', false],
+  ['sources', '多元信源与采访对象', false], ['questions', '阶梯式采访提纲', false], ['facts', '已知客观事实', true],
+  ['opinions', '各方观点与利益博弈', true], ['verify', '待核实疑点与风险信息', true], ['checklist', '事实核查 Checklist', true],
+  ['titles', '跨媒介多平台标题矩阵', false],
 ];
 
 const genMLBlocks = (topic: string, bg: string): Block[] => [
-  { id: 'value', title: '选题价值', verify: false, items: [`聚焦 ${topic || '该主题'} 的社会痛点与行业变革`, '兼具一线人物叙事与公共议题思考', '适合多平台跨媒介分发传播'] },
-  { id: 'audience', title: '目标受众', verify: false, items: ['青年群体与高校应届生', '传媒、内容与AI产品从业者', '关注社会议题与生活方式的普通受众'] },
-  { id: 'angles', title: '报道角度', verify: false, items: [`人物特写：一线亲历者的真实日常与转型`, `数据透视：行业现状与成本效率对比`, `边界反思：技术介入下的真实性与伦理底线`, '未来展望：人机协作的新内容生态'] },
-  { id: 'sources', title: '采访对象', verify: false, items: ['青年实践者 / 当事人', '高校新闻与传播学院学者', '一线行业资深编导 / 运营负责人', '技术平台行业专家'] },
-  { id: 'questions', title: '采访问题', verify: false, items: ['最初接触或投身该领域的契机是什么？', '当前最核心的矛盾与痛点在哪里？', 'AI等新技术给你的工作带来了哪些改变？', '有哪些环节你认为永远无法被机器替代？'] },
-  { id: 'facts', title: '已知事实', verify: true, items: ['相关行业正在经历数字化与智能化转型', '多地已出台扶持或规范政策'] },
-  { id: 'opinions', title: '各方观点', verify: true, items: ['“技术是工具，核心判断与审美依然取决于人”', '“真正被替代的不是人，而是不会使用新工具的人”'] },
-  { id: 'verify', title: '待核实信息', verify: true, items: ['受访者身份职务及机构真实资质', '引用数据口径与统计来源真实性', '涉及商业合作的协议条款透明度'] },
-  { id: 'checklist', title: '事实核查清单', verify: true, items: ['[ ] 交叉验证至少两个独立信源', '[ ] 标明所有引用数据的时间与出处', '[ ] 涉及关键争议事实调取一手证明材料'] },
-  { id: 'titles', title: '平台标题方向', verify: false, items: [`短视频：“${topic || '这个选题'}背后，你不知道的真相”`, `深度稿：《${topic || '时代切片'}：一次人机协作的深度观察》`, `小红书：干货整理｜${topic || '选题拆解'}全流程手记`] },
+  { id: 'value', title: '选题价值与社会共鸣', verify: false, items: [`聚焦「${topic || '该主题'}」在当下的现实痛点与行业变革`, '兼具一线微观人物叙事与宏观公共议题思考', '具备较强的多平台跨媒介分发与深度讨论价值'] },
+  { id: 'audience', title: '目标受众与圈层画像', verify: false, items: ['青年从业者与行业关注人群', '内容创作、媒体与技术产品从业者', '关注社会民生变迁与新生活方式的泛受众'] },
+  { id: 'angles', title: '多维报道与切入角度', verify: false, items: [`微观特写：一线当事人的真实处境与日常选择`, `中观透视：行业效率、成本结构与生存空间对比`, `宏观反思：新技术与新业态介入下的规则与伦理边界`, '发展展望：人机协作与未来内容生产的新范式'] },
+  { id: 'sources', title: '多元信源与采访对象', verify: false, items: ['一线亲历者 / 当事人核心代表', '相关高校与科研机构专家学者', '行业资深从业者 / 运营业务负责人', '平台技术与监管合规专家'] },
+  { id: 'questions', title: '阶梯式采访提纲', verify: false, items: ['最初进入该领域或做出选择的核心契机是什么？', '当前面临的最主要矛盾、阻碍与真实痛点是什么？', '新技术与新工具的介入带来了哪些具体效率与体验改变？', '在整个工作流中，哪些环节你认为始终需要人的专业把关？'] },
+  { id: 'facts', title: '已知客观事实', verify: true, items: ['相关领域正在经历智能化与数字化工作流升级', '行业多地已出台扶持引导或合规治理政策'] },
+  { id: 'opinions', title: '各方观点与利益博弈', verify: true, items: ['“技术是生产力杠杆，核心审美与深度洞察仍取决于人”', '“真正拉开差距的不是工具本身，而是人机协同的工作流设计”'] },
+  { id: 'verify', title: '待核实疑点与风险信息', verify: true, items: ['受访主体机构资质与职务信息的真实性', '引用统计数据、行业报告的发布时间与统计口径', '涉及商业推广与赞助合作条款的透明度'] },
+  { id: 'checklist', title: '事实核查 Checklist', verify: true, items: ['[ ] 核心事实交叉核对至少 2 个独立信息源', '[ ] 明确标注所有援引数据的时间点与权威出处', '[ ] 涉及争议观点调取一手书面或影像凭证'] },
+  { id: 'titles', title: '跨媒介多平台标题矩阵', verify: false, items: [`短视频端：“${topic || '这个话题'}背后，真实的日常究竟是怎样？”`, `深度专栏：《${topic || '时代切片'}：一次人机协同的创作观察》`, `社媒图文：全流程拆解｜${topic || '深度选题'}采编与核查手记`] },
 ];
 
 function MediaLens() {
@@ -57,7 +56,7 @@ function MediaLens() {
 
   const create = () => {
     const id = uid();
-    const newTitle = name.trim() || '媒眼项目';
+    const newTitle = name.trim() || '媒眼选题项目';
     setList([...list, { id, title: newTitle, topic: '', bg: '', blocks: [] }]);
     setAid(id);
     setShow(false);
@@ -108,7 +107,7 @@ function MediaLens() {
       } else {
         persist(genMLBlocks(topic, bg));
       }
-      toast(res.fromAI ? '生成完成' : '已载入高质量场景语料（Demo模式）');
+      toast(res.fromAI ? '生成完成' : '已载入场景策划框架（Demo模式）');
     } finally {
       setLoading('');
     }
@@ -123,13 +122,14 @@ function MediaLens() {
 
   const exp = () => {
     if (!active) return;
-    dlFile(`${active.title}.md`, `# ${active.title}
+    dlFile(`${active.title}.md`, `# ${active.title} - 采编策划与事实核查案
 
-主题：${topic}
+## 基本信息
+- 生成时间：${new Date().toLocaleString()}
+- 选题主题：${topic}
+- 背景资料：${bg || '无'}
 
-背景：${bg}
-
-${blocks.map(b => `## ${b.title}${b.verify ? '（待核实）' : ''}
+${blocks.map(b => `### ${b.title}${b.verify ? '（⚠️ 需人工核查）' : ''}
 ${b.items.map(x => `- ${x}`).join('
 ')}`).join('
 
@@ -141,7 +141,7 @@ ${b.items.map(x => `- ${x}`).join('
       <Empty
         icon={Search}
         title="媒眼 MediaLens"
-        text="融媒体选题策划与事实框架助手 · 20组垂直场景"
+        text="智能选题策划与事实框架工作台 · 20组垂直场景"
         onClick={() => setShow(true)}
         modal={
           <ProjModal open={show} onClose={() => setShow(false)} list={list} aid={aid} setAid={setAid} onNew={create} onDel={remove} onRen={rename} Icon={Search} sub={(p: MLProj) => `${p.blocks.length}类`} npn={name} setNpn={setName} renOpen={ren} setRenOpen={setRen} />
@@ -156,7 +156,7 @@ ${b.items.map(x => `- ${x}`).join('
   return (
     <Page
       title="媒眼 MediaLens"
-      sub="选题策划 · 事实框架助手"
+      sub="智能选题策划 · 10维事实核查框架"
       icon={Search}
       actions={
         <>
@@ -164,43 +164,44 @@ ${b.items.map(x => `- ${x}`).join('
             <BookMarked className="size-3.5 text-primary" /> 20组场景案例
           </B>
           <B variant="outline" onClick={() => setShow(true)}>项目：{active.title}</B>
-          <B variant="outline" onClick={exp}><Download className="size-3.5" />导出</B>
+          <B variant="outline" onClick={exp}><Download className="size-3.5" />导出策划案</B>
         </>
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <Card c="p-4 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pb-1 border-b border-border/30">
             <h2 className="text-xs font-semibold">选题输入</h2>
             <Badge v={isRealAI ? 'green' : 'default'} c="text-[10px]">
-              {isRealAI ? `🟢 ${aiSettings.provider} 真实AI` : '🔵 Demo语料库'}
+              {isRealAI ? `🟢 ${aiSettings.provider} 真实AI` : '🔵 场景案例库'}
             </Badge>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground block mb-1">主题</label>
-            <Input value={topic} onChange={(e: ChangeEvent<HTMLInputElement>) => { setTopic(e.target.value); persist(blocks, e.target.value, bg); }} placeholder="例如：00后毕业生的数字游民实验" />
+            <label className="text-xs text-muted-foreground block mb-1">主题核心</label>
+            <Input value={topic} onChange={(e: ChangeEvent<HTMLInputElement>) => { setTopic(e.target.value); persist(blocks, e.target.value, bg); }} placeholder="例如：新消费业态下的折扣零售观察" />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground block mb-1">背景材料</label>
-            <TA value={bg} onChange={(v: string) => { setBg(v); persist(blocks, topic, v); }} rows={4} placeholder="粘贴背景新闻或调研线索..." />
+            <label className="text-xs text-muted-foreground block mb-1">背景材料与线索</label>
+            <TA value={bg} onChange={(v: string) => { setBg(v); persist(blocks, topic, v); }} rows={4} placeholder="粘贴背景资料、社媒线索或前期调研记录..." />
           </div>
           <B c="w-full" disabled={!!loading} onClick={() => generate()}>
             <Sparkles className={cn('size-3.5', loading && 'animate-spin')} />
-            {loading === 'all' ? '生成中...' : (isRealAI ? '调用真实 AI 生成' : '智能生成策划方案')}
+            {loading === 'all' ? '生成中...' : (isRealAI ? '调用真实 AI 生成策划' : '智能生成策划框架')}
           </B>
           <B variant="outline" c="w-full" onClick={() => setScenarioOpen(true)}>
             <BookMarked className="size-3.5" /> 载入 20 组垂直场景案例
           </B>
-          <p className="text-[11px] text-amber-800 leading-relaxed bg-amber-50/60 p-2 rounded border border-amber-200/50">
-            <AlertTriangle className="inline size-3 mr-1" /> 事实类信息已强制标记为待核实，需人工把关。
-          </p>
+          <div className="text-[11px] text-amber-800 leading-relaxed bg-amber-50/70 p-2.5 rounded-lg border border-amber-200/60 flex items-start gap-1.5">
+            <ShieldCheck className="size-4 shrink-0 text-amber-600 mt-0.5" />
+            <span><b>事实风控机制</b>：客观事实、观点引语与核查清单强制标为「待核实」，需人工双信源把关。</span>
+          </div>
         </Card>
 
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-3">
           {!blocks.length && (
             <Card c="p-12 text-center text-sm text-muted-foreground md:col-span-2">
               <Search className="size-10 mx-auto mb-2 text-muted-foreground/30" />
-              点击“智能生成”或从“20组场景案例”载入示范
+              点击左侧“智能生成策划框架”或从“20组场景案例”直接载入
             </Card>
           )}
           {blocks.map(b => (
@@ -212,8 +213,8 @@ ${b.items.map(x => `- ${x}`).join('
                   className="font-semibold text-xs bg-transparent min-w-0 flex-1 outline-none"
                 />
                 <div className="flex items-center gap-1">
-                  {b.verify && <Badge v="amber">待核实</Badge>}
-                  <button aria-label="重新生成本项" onClick={() => generate(b.id)} className="p-1 hover:bg-accent rounded text-primary cursor-pointer" title="重新生成">
+                  {b.verify && <Badge v="amber">需核实</Badge>}
+                  <button aria-label="重新生成本项" onClick={() => generate(b.id)} className="p-1 hover:bg-accent rounded text-primary cursor-pointer" title="重新生成此模块">
                     <Sparkles className={cn('size-3.5', loading === b.id && 'animate-spin')} />
                   </button>
                   <button aria-label="添加条目" onClick={() => persist(blocks.map(x => x.id === b.id ? { ...x, items: [...x.items, ''] } : x))} className="p-1 hover:bg-accent rounded text-muted-foreground cursor-pointer" title="添加一项">
@@ -278,39 +279,35 @@ function Page({ title, sub, icon: Icon, actions, children }: { title: string; su
 }
 
 const nav = [
-  ['/', '首页', Home],
-  ['/medialens', '媒眼', Search],
-  ['/shotflow', '镜序', Film],
-  ['/quotecut', '声迹', Mic],
-  ['/documentary', '微纪录片', BookOpen],
-  ['/narrative-exp', '叙事实验', Layers],
+  ['/', '工作流总览', Home],
+  ['/medialens', '媒眼 MediaLens', Search],
+  ['/shotflow', '镜序 ShotFlow', Film],
 ] as const;
 
 function Layout({ children }: { children: ReactNode }) {
-  const loc = useLocation();
   const [apiModal, setApiModal] = useState(false);
   const settings = getAISettings();
   const isOnline = settings.provider !== 'demo' && !!settings.apiKey.trim();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/40">
         <div className="max-w-7xl mx-auto px-4 h-14 flex justify-between items-center">
           <Link to="/" className="font-serif font-bold text-sm flex items-center gap-2">
-            <div className="size-7 rounded bg-gradient-to-br from-teal-500 via-amber-500 to-purple-500 flex items-center justify-center text-xs text-white font-bold">AI</div>
-            <span>AI × 融媒体作品集</span>
+            <div className="size-7 rounded-lg bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center text-xs text-white font-bold shadow-xs">AI</div>
+            <span>MediaFlow 智能创作工作流</span>
           </Link>
           <div className="flex items-center gap-2">
-            <nav className="hidden md:flex items-center gap-0.5">
+            <nav className="flex items-center gap-1">
               {nav.map(([p, l, I]) => (
-                <NavLink key={p} to={p} end={p === '/'} className={({ isActive }) => cn('px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1 transition-colors', isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent/50')}>
+                <NavLink key={p} to={p} end={p === '/'} className={({ isActive }) => cn('px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors', isActive ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground hover:bg-accent/60')}>
                   <I className="size-3.5" />{l}
                 </NavLink>
               ))}
             </nav>
             <button
               onClick={() => setApiModal(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border/60 hover:bg-accent/60 text-xs font-medium text-foreground/80 cursor-pointer transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border/60 hover:bg-accent/60 text-xs font-medium text-foreground/80 cursor-pointer transition-all ml-1"
               title="配置大模型 API Key"
             >
               <Settings className="size-3.5 text-primary" />
@@ -321,120 +318,101 @@ function Layout({ children }: { children: ReactNode }) {
         </div>
       </header>
       <main className="flex-1">{children}</main>
-      <footer className="border-t border-border/30 py-4 text-center text-[10px] text-muted-foreground">
-        河海大学 2027 届广播电视学 · AI 产品经理候选人作品集｜姓名、邮箱、简历待补充
+      <footer className="border-t border-border/30 py-4 text-center text-[11px] text-muted-foreground">
+        MediaFlow 智能创作工作流工作台 · 前期采编策划 × 视听分镜生成
       </footer>
       <AISettingsModal open={apiModal} onClose={() => setApiModal(false)} />
     </div>
   );
 }
 
-const projects = [
-  ['/medialens', '媒眼 MediaLens', '融媒体选题策划与事实框架（20场景）', Search, 'from-blue-500 to-cyan-500', ['选题策划', '事实核查', '20组场景']],
-  ['/shotflow', '镜序 ShotFlow', '短视频脚本与分镜工作台（20场景）', Film, 'from-teal-500 to-emerald-500', ['第一主项目', '分镜设计', '双版本对比']],
-  ['/quotecut', '声迹 QuoteCut', '采访检索与金句粗剪（20场景）', Mic, 'from-purple-500 to-pink-500', ['第二主项目', '时间码SRT', '粗剪时间线']],
-  ['/documentary', '《河流边的青春切片》', '互动微纪录片 · 待采访验证', BookOpen, 'from-amber-500 to-orange-500', ['真实内容', '四原则', '人工把关']],
-  ['/narrative-exp', '一份素材，三种叙事', '跨平台叙事对比实验 · 待补充', Layers, 'from-rose-500 to-red-500', ['跨媒介', '叙事差异', '对比框架']],
-] as const;
-
 function HomePage() {
   const [apiModal, setApiModal] = useState(false);
   return (
     <>
-      <section className="py-16 text-center bg-gradient-to-br from-teal-500/5 via-background to-purple-500/5 border-b border-border/30">
-        <Badge v="outline" c="mb-3">广播电视学 × AI 产品经理候选人</Badge>
+      <section className="py-16 text-center bg-gradient-to-br from-teal-500/5 via-background to-indigo-500/5 border-b border-border/30">
+        <Badge v="outline" c="mb-3">端到端智能创作工作流</Badge>
         <h1 className="text-2xl md:text-4xl font-serif font-bold mb-3 leading-tight">
-          用 AI 重新定义<span className="text-teal-700">内容生产工作流</span>
+          用 AI 重新定义<span className="text-teal-700">内容生产双引擎</span>
         </h1>
-        <p className="text-xs md:text-sm text-muted-foreground max-w-xl mx-auto mb-5">
-          关注生成式 AI 如何提升选题策划、视听表达和采访后期效率。内置 60 组融媒体垂直场景案例库，支持前端直连真实模型。
+        <p className="text-xs md:text-sm text-muted-foreground max-w-xl mx-auto mb-6 leading-relaxed">
+          打通从「前期选题策划与事实风控」到「视听分镜生成与锁定保真」的完整创作闭环。内置 40 组专业场景案例库，支持前端安全直连大模型。
         </p>
-        <div className="flex items-center justify-center gap-2 flex-wrap mb-4">
-          <Link to="/shotflow"><B><Sparkles className="size-3.5" />主项目·镜序</B></Link>
-          <Link to="/medialens"><B variant="outline">媒眼选题</B></Link>
-          <Link to="/quotecut"><B variant="outline">声迹粗剪</B></Link>
-          <B variant="outline" onClick={() => setApiModal(true)}><Settings className="size-3.5" />配置真实 AI</B>
+        <div className="flex items-center justify-center gap-2.5 flex-wrap">
+          <Link to="/medialens"><B size="sm"><Search className="size-3.5" />媒眼 MediaLens（选题策划）</B></Link>
+          <Link to="/shotflow"><B variant="outline" size="sm"><Film className="size-3.5" />镜序 ShotFlow（视听分镜）</B></Link>
+          <B variant="outline" size="sm" onClick={() => setApiModal(true)}><Settings className="size-3.5" />配置实时 AI</B>
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto p-4 py-10">
-        <div className="text-center mb-8">
-          <h2 className="text-lg font-serif font-bold">完整证据链与产品矩阵</h2>
-          <p className="text-xs text-muted-foreground mt-1">发现问题 → 定义方案 → Coding实现 → 内容验证 → 反馈迭代</p>
+      <section className="max-w-5xl mx-auto p-4 py-12">
+        <div className="text-center mb-10">
+          <h2 className="text-lg font-serif font-bold">两大核心生产力工具链</h2>
+          <p className="text-xs text-muted-foreground mt-1">发现需求 → 事实风控 → 视听转化 → 锁定微调 → 工业导出</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map(([p, t, s, I, col, badges]) => (
-            <Link key={p} to={p} className="group">
-              <Card c="p-5 h-full hover:border-primary/40 hover:shadow-md transition-all flex flex-col justify-between">
-                <div>
-                  <div className={cn('size-10 rounded-lg bg-gradient-to-br flex items-center justify-center text-white mb-3', col)}>
-                    <I className="size-5" />
-                  </div>
-                  <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{t}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 mb-3 leading-relaxed">{s}</p>
-                </div>
-                <div className="flex items-center gap-1 flex-wrap pt-2 border-t border-border/30">
-                  {badges.map(b => <Badge key={b} v="outline" c="text-[10px]">{b}</Badge>)}
-                </div>
-              </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card c="p-6 flex flex-col justify-between hover:border-primary/40 hover:shadow-md transition-all">
+            <div>
+              <div className="size-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white mb-4 shadow-sm">
+                <Search className="size-6" />
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-base">媒眼 MediaLens</h3>
+                <Badge v="outline">前期策划</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                解决前期选题发散无序与事实失真痛点。提供 10 维全景采编策划矩阵与强制事实核查机制，确保内容深度与真实性底线。
+              </p>
+              <div className="space-y-1.5 text-xs text-muted-foreground mb-4">
+                <div className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-teal-600" /> 10 维结构化采编策划案输出</div>
+                <div className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-teal-600" /> 事实类信息强制「待核实」标记</div>
+                <div className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-teal-600" /> 20 组多领域垂直采编场景语料</div>
+              </div>
+            </div>
+            <Link to="/medialens" className="pt-3 border-t border-border/40 flex items-center justify-between text-xs font-semibold text-primary hover:underline">
+              <span>进入媒眼工作台</span>
+              <ArrowRight className="size-3.5" />
             </Link>
-          ))}
+          </Card>
+
+          <Card c="p-6 flex flex-col justify-between hover:border-primary/40 hover:shadow-md transition-all">
+            <div>
+              <div className="size-11 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white mb-4 shadow-sm">
+                <Film className="size-6" />
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-base">镜序 ShotFlow</h3>
+                <Badge v="amber">视听分镜</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                解决剧本文案向专业视听语言转化难题。支持 9 维广播级镜头参数、锁定保真占位合成算法与双版本 Diff 协同对比。
+              </p>
+              <div className="space-y-1.5 text-xs text-muted-foreground mb-4">
+                <div className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-teal-600" /> 9 维影视视听参数（景别/运镜/生图Prompt）</div>
+                <div className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-teal-600" /> 锁定镜头位置与参数保真合成</div>
+                <div className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-teal-600" /> 双版本 Diff 对比与制作级 CSV 导出</div>
+              </div>
+            </div>
+            <Link to="/shotflow" className="pt-3 border-t border-border/40 flex items-center justify-between text-xs font-semibold text-primary hover:underline">
+              <span>进入镜序工作台</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </Card>
         </div>
 
-        <Card c="p-4 mt-6 bg-amber-50/70 border-amber-200 text-xs text-amber-800 flex items-start gap-2">
-          <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-600" />
-          <span><b>真实性与伦理声明</b>：所有未完成真实数据、个人履历和采访材料均标记“待补充”，不编造事实。所有工具默认内置60组精编案例，可零配置即开即用体验。</span>
-        </Card>
+        <div className="mt-8 p-4 rounded-xl bg-card border border-border/50 text-xs text-muted-foreground flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="size-4 text-green-600 shrink-0" />
+            <span><b>双模式运行保障</b>：默认内置 40 组专业场景语料库直接体验；支持配置自定义大模型 API Key 本地安全直连。</span>
+          </div>
+          <button onClick={() => setApiModal(true)} className="text-primary font-medium hover:underline text-xs cursor-pointer">
+            配置 API 密钥 →
+          </button>
+        </div>
       </section>
       <AISettingsModal open={apiModal} onClose={() => setApiModal(false)} />
     </>
-  );
-}
-
-function Documentary() {
-  return (
-    <Page title="《河流边的青春切片》" sub="互动微纪录片 · 待采访验证" icon={BookOpen}>
-      <Card c="p-4 bg-amber-50 border-amber-200 text-xs text-amber-800 mb-4">
-        所有人物、故事和数据均为待采访占位。内容原则：一个核心人物、一个具体场景、一个明确问题、一条可验证叙事线。
-      </Card>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {[['媒眼 MediaLens', '负责前期选题价值与采访提纲事实核查', Search], ['镜序 ShotFlow', '负责6个镜头视听分镜生成与时长平衡', Film], ['声迹 QuoteCut', '负责采访逐字稿金句提取与1分/3分粗剪', Mic]].map(([t, d, I]: any) => (
-          <Card key={t} c="p-4 text-center">
-            <I className="size-6 text-primary mx-auto mb-2" />
-            <h4 className="text-xs font-semibold">{t}</h4>
-            <p className="text-[11px] text-muted-foreground mt-1">{d}</p>
-          </Card>
-        ))}
-      </div>
-    </Page>
-  );
-}
-
-function Narrative() {
-  const [t, setT] = useState(0);
-  const tabs = ['电视新闻版', '竖屏短视频', '播客版'];
-  return (
-    <Page title="一份素材，三种叙事" sub="跨平台叙事对比实验 · 待补充" icon={Layers}>
-      <div className="flex gap-1 mb-3">
-        {tabs.map((x, i) => (
-          <button key={x} onClick={() => setT(i)} className={cn('flex-1 p-2 rounded-md border text-xs font-medium transition-all cursor-pointer', t === i ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border/60 hover:bg-accent/40')}>
-            {x}
-          </button>
-        ))}
-      </div>
-      <Card c="p-4 text-sm space-y-2">
-        <p className="text-xs text-muted-foreground">同一组采访素材在不同媒介渠道下的叙事重构实验：</p>
-        <div className="space-y-1.5 text-xs">
-          {['标题设计', '开场抓手', '内容推进顺序', '片段取舍原则', '字幕与音效密度', '目标受众画像', '人工修改量占比'].map(label => (
-            <div key={label} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
-              <span className="text-muted-foreground">{label}</span>
-              <Badge v="amber">待真实采访后补充</Badge>
-            </div>
-          ))}
-        </div>
-      </Card>
-    </Page>
   );
 }
 
@@ -456,9 +434,6 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/medialens" element={<MediaLens />} />
           <Route path="/shotflow" element={<ShotFlowPage />} />
-          <Route path="/quotecut" element={<QuoteCutPage />} />
-          <Route path="/documentary" element={<Documentary />} />
-          <Route path="/narrative-exp" element={<Narrative />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
