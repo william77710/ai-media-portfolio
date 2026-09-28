@@ -67,7 +67,6 @@ ${shots.map(s => `### 镜头 ${s.n} · 【${s.st}】${s.cam}（${s.dur}秒）
   dlFile(`${name}-拍摄清单.md`, md);
 };
 
-// 严格占位替换式锁定合并：锁定镜头位置与内容完全保留，空缺位填充新生成镜头
 function mergeLocked(locked: Shot[], newGenerated: Shot[], targetTotal: number): Shot[] {
   const count = Math.max(targetTotal, ...locked.map(s => s.n), locked.length, newGenerated.length);
   const result: Shot[] = [];
@@ -492,7 +491,7 @@ export default function ShotFlowPage() {
         );
       })()}
 
-      <ProjModal open={showP} onClose={() => setShowP(false)} list={list} aid={aid} setAid={setAid} onNew={newP} onDel={delP} onRen={renP} Icon={Film} sub={(p: SFProj) => `${p.shots?.length || 0}镜`} npn={npn} setNpn={setNpn} renOpen={renO} setRenOpen={setRenO} />
+      <ProjModal open={showP} onClose={() => setShowP(false)} list={list} aid={aid} setAid={setAid} onNew={newP} onDel={delP} onRen={renP} Icon={Film} sub={(p: SFProj) => `${p.shots?.length || 0}镜`} npn={npn} setNpn={setNpn} renOpen={renO} setRenOpen={setRenOpen} />
       <ScenarioPickerModal open={scenarioOpen} onClose={() => setScenarioOpen(false)} title="镜序短视频分镜场景库" scenarios={SHOTFLOW_SCENARIOS} onSelect={loadScenario} />
 
       {showV && (

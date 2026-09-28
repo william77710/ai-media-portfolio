@@ -9,9 +9,11 @@ type QCProj = { id: string; title: string; mode: string; raw: string; lines: TLi
 
 const parseSRT = (s: string): TLine[] => {
   const r: TLine[] = [];
-  for (const b of s.replace(//g, '').trim().split(/
+  const clean = s.replace(//g, '').trim();
+  const blocks = clean.split(/
 \s*
-/)) {
+/);
+  for (const b of blocks) {
     const l = b.split('
 ');
     const m = l.find(x => x.includes('-->'))?.match(/(\d{2}:\d{2}:\d{2}[,.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,.]\d{3})/);
@@ -23,7 +25,8 @@ const parseSRT = (s: string): TLine[] => {
   return r;
 };
 
-const exportMd = (p: QCProj) => `# ${p.title || '声迹采访剪辑项目'} - 金句与粗剪清单
+const exportMd = (p: QCProj) => {
+  const header = `# ${p.title || '声迹采访剪辑项目'} - 金句与粗剪清单
 
 ## 基础信息
 - 整理时间：${new Date().toLocaleString()}
@@ -31,28 +34,31 @@ const exportMd = (p: QCProj) => `# ${p.title || '声迹采访剪辑项目'} - �
 - 提炼金句：${p.quotes?.length || 0} 条
 - 粗剪入选：${p.selected?.length || 0} 段
 
-## 精选金句分类列表
+`;
+  const quotesSection = `## 精选金句分类列表
 
-${p.quotes.map(q => {
-  const l = p.lines[q.idx - 1] || p.lines[q.idx];
-  return l ? `### 【${q.cat}】[${fmtTime(l.start)} - ${fmtTime(l.end)}]
+` + p.quotes.map(q => {
+    const l = p.lines[q.idx - 1] || p.lines[q.idx];
+    return l ? `### 【${q.cat}】[${fmtTime(l.start)} - ${fmtTime(l.end)}]
 > “${l.text}”
 
 **剪辑入选理由**：${q.reason}
 ` : '';
-}).filter(Boolean).join('
-')}
+  }).filter(Boolean).join('
+');
+  const roughSection = `
 
 ## 粗剪时间线汇编
 
 | 镜头号 | 入点时间 | 出点时间 | 采访同期声内容 |
 |:---:|:---:|:---:|:---|
-${p.selected.map((i, n) => {
-  const l = p.lines[i];
-  return l ? `| ${n + 1} | \`${fmtTime(l.start)}\` | \`${fmtTime(l.end)}\` | ${l.text} |` : '';
-}).filter(Boolean).join('
-')}
-`;
+` + p.selected.map((i, n) => {
+    const l = p.lines[i];
+    return l ? `| ${n + 1} | \`${fmtTime(l.start)}\` | \`${fmtTime(l.end)}\` | ${l.text} |` : '';
+  }).filter(Boolean).join('
+');
+  return header + quotesSection + roughSection;
+};
 
 export default function QuoteCutPage() {
   const { list, setList, aid, setAid, active } = usePM<QCProj>('qc-list', 'qc-active');
@@ -141,7 +147,6 @@ export default function QuoteCutPage() {
       }
 
       if (!extracted.length) {
-        // 智能启发式从文本中生成金句
         extracted = lines.slice(0, 5).map((l, i) => ({
           idx: i,
           cat: i % 4 === 0 ? '事实' : i % 4 === 1 ? '经历' : i % 4 === 2 ? '观点' : '情绪表达',
