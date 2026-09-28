@@ -41,7 +41,6 @@ function MediaLens() {
   const [ren, setRen] = useState(false);
   const [name, setName] = useState('');
   const [scenarioOpen, setScenarioOpen] = useState(false);
-  const [lastMode, setLastMode] = useState<'ai' | 'demo' | null>(null);
 
   useEffect(() => {
     if (active) {
@@ -82,10 +81,8 @@ function MediaLens() {
     setLoading(targetId || 'all');
     try {
       const res = await proxyOrDemo('medialens_generate', { topic, bg, section: targetId });
-      setLastMode(res.fromAI ? 'ai' : 'demo');
 
       if (res.fromAI && res.data) {
-        // 解析真实 AI 返回的 JSON
         const parsed = robustJSONParse<any>(res.data, null);
         if (parsed && typeof parsed === 'object') {
           if (targetId) {
@@ -105,7 +102,6 @@ function MediaLens() {
         }
       }
 
-      // 降级使用结构化高质量语料
       if (targetId) {
         const d = genMLBlocks(topic, bg).find(x => x.id === targetId);
         if (d) persist(blocks.map(x => x.id === targetId ? { ...d, items: d.items.map((v, i) => i === 0 ? v + '（重生成）' : v) } : x));
@@ -123,7 +119,6 @@ function MediaLens() {
     setBg(s.input.bg);
     const bs = genMLBlocks(s.input.topic, s.input.bg);
     persist(bs, s.input.topic, s.input.bg);
-    setLastMode('demo');
   };
 
   const exp = () => {
