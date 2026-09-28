@@ -1,7 +1,7 @@
 import { StrictMode, useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter, Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { AlertTriangle, BookOpen, ChevronRight, Download, Film, Home, Layers, Mic, Plus, Search, Sparkles, XCircle, Settings, BookMarked, Zap } from 'lucide-react';
+import { AlertTriangle, BookOpen, ChevronRight, Download, Film, Home, Layers, Mic, Plus, Search, Sparkles, XCircle, Settings, BookMarked } from 'lucide-react';
 import ShotFlowPage from './ShotFlowPage';
 import QuoteCutPage from './QuoteCutPage';
 import { B, Badge, Card, Input, ProjModal, TA, cn, dlFile, proxyOrDemo, toast, uid, usePM, AISettingsModal, ScenarioPickerModal, getAISettings, robustJSONParse } from './shared';

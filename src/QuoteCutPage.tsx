@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
-import { Check, Download, Mic, Pause, Play, Plus, Search, ShieldCheck, Sparkles, Trash2, X, Zap, BookMarked, Clock } from 'lucide-react';
+import { Check, Download, Mic, Pause, Play, Plus, Search, ShieldCheck, Sparkles, Trash2, X, Zap, BookMarked } from 'lucide-react';
 import { B, Badge, Card, Input, ProjModal, TA, cn, dlFile, fmtTime, parseT, proxyOrDemo, toast, uid, usePM, ScenarioPickerModal, getAISettings, robustJSONParse } from './shared';
 import { QUOTECUT_SCENARIOS } from './corpus';
 
@@ -9,7 +9,7 @@ type QCProj = { id: string; title: string; mode: string; raw: string; lines: TLi
 
 const parseSRT = (s: string): TLine[] => {
   const r: TLine[] = [];
-  const clean = s.replace(//g, '').trim();
+  const clean = (s || '').replace(//g, '').trim();
   const blocks = clean.split(/
 \s*
 /);
@@ -37,7 +37,7 @@ const exportMd = (p: QCProj) => {
 `;
   const quotesSection = `## 精选金句分类列表
 
-` + p.quotes.map(q => {
+` + (p.quotes || []).map(q => {
     const l = p.lines[q.idx - 1] || p.lines[q.idx];
     return l ? `### 【${q.cat}】[${fmtTime(l.start)} - ${fmtTime(l.end)}]
 > “${l.text}”
@@ -52,7 +52,7 @@ const exportMd = (p: QCProj) => {
 
 | 镜头号 | 入点时间 | 出点时间 | 采访同期声内容 |
 |:---:|:---:|:---:|:---|
-` + p.selected.map((i, n) => {
+` + (p.selected || []).map((i, n) => {
     const l = p.lines[i];
     return l ? `| ${n + 1} | \`${fmtTime(l.start)}\` | \`${fmtTime(l.end)}\` | ${l.text} |` : '';
   }).filter(Boolean).join('
