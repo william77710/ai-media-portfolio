@@ -37,12 +37,10 @@ export function robustJSONParse<T>(raw: string, fallback: T): T {
   if (!raw || typeof raw !== 'string') return fallback;
   try {
     let clean = raw.trim();
-    // 去除 Markdown 代码块标记
     if (clean.includes('```')) {
       const match = clean.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (match && match[1]) clean = match[1].trim();
     }
-    // 尝试寻找最外层 {} 或 []
     const firstBrace = clean.indexOf('{');
     const firstBracket = clean.indexOf('[');
     if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
@@ -108,7 +106,7 @@ export async function proxyOrDemo(
     const userContent = `任务名称: ${task}
 输入参数: ${JSON.stringify(payload, null, 2)}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000); // 25s 超时
+    const timeout = setTimeout(() => controller.abort(), 25000);
 
     const res = await fetch(endpoint, {
       method: 'POST',
