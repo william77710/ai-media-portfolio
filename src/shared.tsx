@@ -100,7 +100,8 @@ export async function proxyOrDemo(
     return { ok: true, fromAI: false };
   }
 
-  const endpoint = `${settings.baseUrl.replace(//+$/, '')}/chat/completions`;
+  const cleanBase = settings.baseUrl.trim().replace(//+$/, '');
+  const endpoint = `${cleanBase}/chat/completions`;
   const defaultSys = `你是一位资深融媒体采编主任、影视编导与纪录片剪辑专家。请严格按照任务要求的结构化 JSON 格式返回，不输出任何与 JSON 无关的客套话。`;
 
   try {
@@ -175,7 +176,8 @@ export function AISettingsModal({ open, onClose }: { open: boolean; onClose: () 
     setTesting(true);
     setTestRes(null);
     try {
-      const endpoint = `${settings.baseUrl.replace(//+$/, '')}/chat/completions`;
+      const cleanBase = settings.baseUrl.trim().replace(//+$/, '');
+      const endpoint = `${cleanBase}/chat/completions`;
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${settings.apiKey.trim()}` },
